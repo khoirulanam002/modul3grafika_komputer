@@ -60,8 +60,8 @@ async function loadPPMTexture(url) {
 
 let mesh;
 Promise.all([
-  new OBJLoader().loadAsync("data/pusaka_model.obj"),
-  loadPPMTexture("data/relief.ppm"),
+  new OBJLoader().loadAsync("/modul3grafika_komputer/data/pusaka_model.obj"),
+  loadPPMTexture("/modul3grafika_komputer/data/relief.ppm"),
 ]).then(([obj, tex]) => {
   const mat = new THREE.MeshLambertMaterial({ map: tex, side: THREE.DoubleSide, flatShading: true });
   obj.traverse((c) => { if (c.isMesh) c.material = mat; });
