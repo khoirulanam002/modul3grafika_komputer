@@ -10,7 +10,7 @@ import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 const W = 512, H = 512;
 const canvas = document.getElementById("c");
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, preserveDrawingBuffer: true });
 renderer.setPixelRatio(1);
 renderer.setSize(W, H, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace;      // match srgb.py output encode
@@ -63,7 +63,7 @@ Promise.all([
   new OBJLoader().loadAsync("../data/pusaka_model.obj"),
   loadPPMTexture("../data/relief.ppm"),
 ]).then(([obj, tex]) => {
-  const mat = new THREE.MeshLambertMaterial({ map: tex, side: THREE.DoubleSide });
+  const mat = new THREE.MeshLambertMaterial({ map: tex, side: THREE.DoubleSide, flatShading: true });
   obj.traverse((c) => { if (c.isMesh) c.material = mat; });
   obj.scale.set(1.4, 1.4, 1.4);
   obj.rotation.y = THREE.MathUtils.degToRad(35);   // rot_y(35) in transforms.py
@@ -86,7 +86,7 @@ document.getElementById("wire").addEventListener("click", () => {
   mesh?.traverse((c) => { if (c.isMesh) c.material.wireframe = !c.material.wireframe; });
 });
 
-document.getElementById("export").addEventListener("click", () => {
+function doExport() {
   renderer.render(scene, camera);
   const gl = renderer.getContext();
   const px = new Uint8Array(W * H * 4);
@@ -102,4 +102,15 @@ document.getElementById("export").addEventListener("click", () => {
   a.href = URL.createObjectURL(new Blob([header, body]));
   a.download = "temple_three.ppm";
   a.click();
+}
+
+document.getElementById("export").addEventListener("click", doExport);
+
+document.getElementById("reset-export").addEventListener("click", () => {
+  // Reset camera to exact raster3d.py defaults, then export
+  camera.position.set(2.6, 2.0, 3.4);
+  controls.target.set(0, 0.7, 0);
+  controls.update();
+  renderer.render(scene, camera);
+  doExport();
 });
